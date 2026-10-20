@@ -88,3 +88,5 @@ Use the pinned source and runtime patch from [root access](root-access.md). The 
 ## Root command timed out or cleanup failed
 
 Keep the structured result and redact it before sharing. Check the actual failing stage. Don't report success from a partial result or assume reboot removes persistent staging files. Refer to the pinned upstream source for the reported failure; avoid unrelated root commands while diagnosing it.
+
+For the interactive backend, inspect private `tv-root-last-cleanup.json` and the final session screen. A failed close remains visible. The helper resets the background bootstrap's ignored interrupt signals before starting the native PTY; without that reset, a shell can accept commands while foreground programs ignore Ctrl+C. Long SDB checks are staged conservatively because this Frame rejected some inline commands near the upstream length limit.

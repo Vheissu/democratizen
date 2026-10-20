@@ -40,4 +40,4 @@ For root-related failures, report the stage and sanitized error. Don't attach ra
 
 ## Areas that need work
 
-Physical Bluetooth verification, more TV models, non-US layouts, long-running terminal use and a host platform matrix all need evidence. A TV-resident interactive shell is a future feature. It needs its own authenticated backend, privilege/lifetime controls and recovery behaviour; opening an unauthenticated TV listener isn't an acceptable shortcut.
+Physical Bluetooth verification, more TV models, non-US layouts, long-running terminal use and a host platform matrix all need evidence. The [TV root backend](docs/tv-shell.md) also needs reports from other compatible firmware. Keep its authenticated callback, explicit acquisition and cleanup checks intact when extending it.

@@ -14,6 +14,7 @@ let activeId = null;
 let sessions = [];
 let socket, cipher, reconnectTimer, toastTimer, modalAction;
 let ready = false, creating = false, controls = false, retryDelay = 1000;
+let capabilities = {};
 const unit = () => document.documentElement.style.setProperty('--unit', `${window.innerWidth / 1920}px`);
 unit();
 const term = new Terminal({
@@ -67,21 +68,28 @@ function render() {
   $('sessions').replaceChildren();
   sessions.forEach((session, i) => {
     const button = document.createElement('button');
-    button.className = `session${session.id === selectedId ? ' selected' : ''}${session.exited ? ' exited' : ''}`;
+    button.className = `session${session.id === selectedId ? ' selected' : ''}${session.exited ? ' exited' : ''}${session.kind === 'tv' ? ' tv' : ''}`;
     button.dataset.nav = ''; button.dataset.session = session.id;
     button.setAttribute('aria-current', session.id === selectedId ? 'true' : 'false');
     const number = document.createElement('span'); number.className = 'number'; number.textContent = session.exited ? '○' : String(i + 1).padStart(2, '0');
     const label = document.createElement('span'); label.className = 'label'; label.textContent = session.name;
-    button.append(number, label); button.addEventListener('click', () => attach(session.id));
+    const target = document.createElement('span'); target.className = 'session-target'; target.textContent = session.kind === 'tv' ? 'ROOT' : 'MAC';
+    if (session.status === 'connecting' || session.status === 'closing') { target.textContent = session.status === 'connecting' ? '…' : 'CLOSING'; button.title = session.status; }
+    button.append(number, label, target); button.addEventListener('click', () => attach(session.id));
     $('sessions').append(button);
     if (controls && previousFocus === session.id) button.focus();
   });
   $('session-count').textContent = `${sessions.length} / 8`;
   const selected = sessions.find(s => s.id === selectedId);
+  $('target-label').textContent = selected?.kind === 'tv' ? 'TV ROOT /' : 'MAC /';
+  $('target-label').classList.toggle('root', selected?.kind === 'tv');
+  $('terminal').setAttribute('aria-label', selected?.kind === 'tv' ? 'TV root terminal' : 'Mac terminal');
   $('session-name').textContent = selected?.name || (ready ? 'Mac terminal' : 'Connecting');
   $('rename').disabled = !ready || !selected;
   $('close-session').disabled = !ready || !selected;
   $('new-session').disabled = !ready || sessions.length >= 8 || creating;
+  $('tv-session').disabled = !ready || !capabilities.tvRoot || creating || (sessions.length >= 8 && !sessions.some(s => s.kind === 'tv' && !s.exited));
+  $('tv-session').title = capabilities.tvRoot ? 'Open or return to the TV root shell · Ctrl Shift T' : 'Enable TV root support on the host: npm run tv:enable';
 }
 function attach(id) {
   if (!ready) return;
@@ -90,10 +98,14 @@ function attach(id) {
   overlay('Restoring session', 'Loading your terminal screen.');
   send({ type: 'attach', id, cols: term.cols, rows: term.rows });
 }
-function create() {
+function create(kind = 'mac') {
   if (!ready || creating) return;
+  if (kind === 'tv') {
+    const existing = sessions.find(s => s.kind === 'tv' && !s.exited);
+    if (existing) { attach(existing.id); return; }
+  }
   creating = true; render(); resize();
-  send({ type: 'create', cols: term.cols, rows: term.rows });
+  send({ type: 'create', kind, cols: term.cols, rows: term.rows });
 }
 function updateSessions(next) {
   sessions = next;
@@ -105,7 +117,7 @@ function updateSessions(next) {
 function receive(message) {
   switch (message.type) {
     case 'ready':
-      ready = true; retryDelay = 1000;
+      ready = true; retryDelay = 1000; capabilities = message.capabilities || {};
       $('connection').textContent = message.hostname; $('connection').className = 'online';
       sessions = message.sessions; render();
       if (sessions.length) attach(sessions.some(s => s.id === selectedId) ? selectedId : sessions[0].id);
@@ -173,7 +185,8 @@ $('modal-form').addEventListener('submit', event => {
   modalAction?.(); dismissModal();
 });
 $('modal-cancel').onclick = dismissModal;
-$('new-session').onclick = create;
+$('new-session').onclick = () => create('mac');
+$('tv-session').onclick = () => create('tv');
 $('rename').onclick = () => openModal('rename');
 $('close-session').onclick = () => openModal('close');
 $('type').onclick = terminalFocus;
@@ -201,6 +214,7 @@ document.addEventListener('keydown', event => {
   if (code === 10009) { event.preventDefault(); event.stopPropagation(); if (!$('modal').hidden) dismissModal(); else if (controls) terminalFocus(); else showControls(); return; }
   if (event.ctrlKey && event.shiftKey) {
     if (event.code === 'KeyN') { event.preventDefault(); event.stopPropagation(); create(); return; }
+    if (event.code === 'KeyT' && capabilities.tvRoot) { event.preventDefault(); event.stopPropagation(); create('tv'); return; }
     if (event.code === 'KeyP') { event.preventDefault(); event.stopPropagation(); controls ? terminalFocus() : showControls(); return; }
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault(); event.stopPropagation();

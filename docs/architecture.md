@@ -11,6 +11,8 @@ flowchart LR
   Host --> S1[PTY and login shell 1]
   Host --> S2[PTY and login shell 2]
   Host --> State[Headless terminal screen per session]
+  Host --> Bridge[Local Python root bridge]
+  Bridge <-->|Pinned TLS callback| TVPTY[TV native PTY and root Bash]
 ```
 
 The TV widget has no host filesystem or shell access by itself. The Node service runs as the logged-in user and owns the processes. A paired client can issue terminal commands with that user's permissions. The preview is another paired client, served only on loopback.
@@ -58,4 +60,4 @@ Authenticated operations are create, list, attach, resize, input, rename and clo
 
 `scripts/service.mjs` installs a user LaunchAgent with absolute Node and repository paths. The service calls `server/main.mjs`, binds the configured interfaces, and disposes PTYs on a graceful shutdown. No shell content is written to the service logs.
 
-The root wrapper is separate from all of this. It isn't loaded into the host service or called from the terminal UI.
+The one-command root wrapper remains independent. The optional TV session backend is `server/tv-pty.mjs`, with private JSON stdio to `server/tv-root-session.py`. The bridge uses the pinned upstream archive helpers to acquire and hold root, stages the managed helper from `tv-pty/`, and accepts its pinned TLS callback. Session targets share headless screen storage and switching, while their process/input backends stay separate. See [TV shell lifetime and bootstrap limits](tv-shell.md).

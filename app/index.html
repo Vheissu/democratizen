@@ -10,14 +10,15 @@
   <main id="app">
     <aside class="sidebar" aria-label="Sessions">
       <div class="brand"><span class="brand-icon">&gt;_</span><div>FRAME<span>TERMINAL</span></div></div>
-      <div class="section-label">ON YOUR MAC <span id="session-count">0 / 8</span></div>
-      <nav id="sessions" aria-label="Mac shell sessions"></nav>
-      <button id="new-session" class="new-session" data-nav><b>+</b> New session</button>
+      <div class="section-label">SESSIONS <span id="session-count">0 / 8</span></div>
+      <nav id="sessions" aria-label="Mac and TV shell sessions"></nav>
+      <button id="new-session" class="new-session" data-nav><b>+</b> Mac session</button>
+      <button id="tv-session" class="tv-session" data-nav>TV root shell</button>
       <div class="sidebar-bottom"><span class="small-dot"></span> PAIRED TO THIS FRAME<p id="host-address"></p><p class="muted">Your shells stay open when<br>you leave the app.</p></div>
     </aside>
     <section class="workspace">
       <header>
-        <div class="heading"><span class="breadcrumb">MAC /</span><h1 id="session-name">Connecting</h1><span id="size" class="muted"></span></div>
+        <div class="heading"><span id="target-label" class="breadcrumb">MAC /</span><h1 id="session-name">Connecting</h1><span id="size" class="muted"></span></div>
         <div class="header-actions"><span id="connection" role="status">Connecting…</span><button id="smaller" data-nav aria-label="Smaller terminal text">A−</button><button id="larger" data-nav aria-label="Larger terminal text">A+</button><button id="rename" data-nav>Rename</button><button id="close-session" data-nav>Close</button></div>
       </header>
       <div id="terminal-wrap"><div id="terminal" aria-label="Mac terminal"></div><div id="overlay"><div class="overlay-icon">&gt;_</div><h2 id="overlay-title">Connecting to your Mac</h2><p id="overlay-message">Opening your paired connection.</p><button id="retry" data-nav hidden>Try again</button></div></div>

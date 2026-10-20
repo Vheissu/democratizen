@@ -1,0 +1,26 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { X509Certificate } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { readConfig, dataDir, workspace } from './frame-config.mjs';
+
+const { host } = readConfig();
+const tool = path.resolve(process.env.SAMSUNG_TV_ROOT_HOME || path.join(workspace, '.tools/samsung-tv-root'));
+const ptyPayloads = path.join(workspace, '.tools/tv-pty');
+const sdk = process.env.TIZEN_STUDIO_HOME || (fs.existsSync(path.join(workspace, '.tools/tizen-studio')) ? path.join(workspace, '.tools/tizen-studio') : path.join(os.homedir(), 'tizen-studio'));
+const sdb = path.resolve(process.env.SDB || path.join(sdk, 'tools/sdb'));
+const python = execFileSync('/usr/bin/which', [process.env.TV_ROOT_PYTHON || 'python3'], { encoding: 'utf8' }).trim();
+const rootPayloads = process.env.TV_ROOT_PAYLOADS || path.join(tool, 'build/common');
+for (const file of [sdb, python, path.join(rootPayloads, 'SamsungTvRootAgent.dll'), path.join(ptyPayloads, 'FrameTerminalPty.dll')]) if (!fs.existsSync(file)) throw new Error(`Missing ${path.basename(file)}. Build root tooling and the TV PTY helper first.`);
+const revision = execFileSync('git', ['-C', tool, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+if (revision !== '4ad2c4d3b0d0e0da4b5b7ebe4a787e94596f416b') throw new Error('TV root bridge requires the documented upstream revision');
+const certificate = path.join(dataDir, 'tv-root-cert.pem');
+const privateKey = path.join(dataDir, 'tv-root-key.pem');
+if (fs.existsSync(certificate) !== fs.existsSync(privateKey)) throw new Error('TV TLS identity is incomplete; restore or remove both certificate files');
+if (!fs.existsSync(certificate)) execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', privateKey, '-out', certificate, '-days', '3650', '-subj', '/CN=frame-terminal'], { stdio: 'pipe' });
+fs.chmodSync(certificate, 0o600); fs.chmodSync(privateKey, 0o600);
+const fingerprint = new X509Certificate(fs.readFileSync(certificate)).fingerprint256.replaceAll(':', '').toLowerCase();
+const config = { enabled: true, tvIP: host.tvIP, host: host.listenHost, tool, sdb, python, rootPayloads, ptyPayloads, certificate, privateKey, fingerprint, statusFile: path.join(dataDir, 'tv-root-last-cleanup.json'), bridge: path.join(workspace, 'server/tv-root-session.py') };
+fs.writeFileSync(path.join(dataDir, 'tv-root.json'), JSON.stringify(config, null, 2) + '\n', { mode: 0o600 });
+console.log('TV root sessions enabled. Restart the host service and deploy the updated app. Root is acquired only when you create a TV session.');

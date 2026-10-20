@@ -147,6 +147,10 @@ button[hidden],
   margin-right: calc(9 * var(--unit));
   font-weight: normal;
 }
+.tv-session { margin: 0 calc(4 * var(--unit)) calc(12 * var(--unit)); text-align: left; color: #edc298; }
+.session-target { font-size: calc(9 * var(--unit)); letter-spacing: calc(.5 * var(--unit)); margin-left: auto; color: var(--muted); }
+.session.tv .session-target, .breadcrumb.root { color: #edc298; }
+.session.tv.selected { border-color: #866648; background: #3a3026; color: #f0d1af; }
 .sidebar-bottom {
   margin-top: auto;
   padding: calc(24 * var(--unit)) calc(8 * var(--unit)) calc(4 * var(--unit));

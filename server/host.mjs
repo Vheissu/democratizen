@@ -7,8 +7,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { base64, unbase64, authenticateHost } from '../shared/crypto.mjs';
 import { SessionManager } from './sessions.mjs';
 
-export function createHost(config, { previewDir, maxSessions = 8 } = {}) {
-  const sessions = new SessionManager({ cwd: config.cwd, shell: config.shell, maxSessions });
+export function createHost(config, { previewDir, maxSessions = 8, tvFactory } = {}) {
+  const sessions = new SessionManager({ cwd: config.cwd, shell: config.shell, tvRoot: config.tvRoot, tvFactory, maxSessions });
   const server = http.createServer((req, res) => {
     res.writeHead(req.url === '/health' ? 200 : 404, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify(req.url === '/health' ? { service: 'Frame Terminal', ready: true } : { error: 'Not found' }));
@@ -54,7 +54,7 @@ export function createHost(config, { previewDir, maxSessions = 8 } = {}) {
         if (!client.cipher) {
           client.cipher = authenticateHost(JSON.parse(text), challenge, unbase64(config.hostSecretKey, 32), config.allowedClients);
           clearTimeout(authTimeout);
-          send(client, { type: 'ready', hostname: os.hostname().replace(/\.local$/, ''), sessions: sessions.list() });
+          send(client, { type: 'ready', hostname: os.hostname().replace(/\.local$/, ''), capabilities: { tvRoot: !!config.tvRoot?.enabled }, sessions: sessions.list() });
           return;
         }
         const message = client.cipher.open(text);
@@ -62,7 +62,7 @@ export function createHost(config, { previewDir, maxSessions = 8 } = {}) {
         try {
           switch (message.type) {
             case 'create': {
-              const s = sessions.create({ cols: message.cols, rows: message.rows });
+              const s = sessions.create({ cols: message.cols, rows: message.rows, kind: message.kind });
               send(client, { type: 'created', id: s.id });
               break;
             }
@@ -132,7 +132,7 @@ export function createHost(config, { previewDir, maxSessions = 8 } = {}) {
       disposed = true;
       clearInterval(heartbeat);
       for (const c of clients) c.ws.terminate();
-      sessions.dispose();
+      await sessions.dispose();
       await Promise.all([new Promise(resolve => server.close(resolve)), preview ? new Promise(resolve => preview.close(resolve)) : Promise.resolve()]);
     }
   };

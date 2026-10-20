@@ -4,7 +4,7 @@ Your TV is a computer. Build something for it.
 
 democratizen is a practical starting point for making Samsung Tizen TVs your own. It includes a working terminal app, a tiny first-app example, deployment scripts, and the steps that got a Samsung Frame accepting our apps and running commands as root.
 
-The first app is **Frame Terminal**: real shells on your Mac, displayed on the TV, with up to eight independent sessions and keyboard input. Leave the TV app, come back, and your shells are still there while the host service is running.
+The first app is **Frame Terminal**: shells on your Mac and an optional root shell on the TV, with up to eight sessions and keyboard input. Switch between machines in the sidebar. Leave the TV app and reconnect while the host and TV stay online to restore your sessions.
 
 ## Start here
 
@@ -15,6 +15,7 @@ The first app is **Frame Terminal**: real shells on your Mac, displayed on the T
 | Create the certificates needed to install apps | [Signing and certificates](docs/signing.md) |
 | Put a small app on the screen first | [Your first TV app](docs/first-app.md) |
 | Use a Mac terminal on the TV | [Frame Terminal setup and controls](docs/frame-terminal.md) |
+| Switch to the TV's own root terminal | [TV root shell](docs/tv-shell.md) |
 | Build my own app | [App development guide](docs/building-apps.md) |
 | Run a command as root on a compatible TV | [Optional root access](docs/root-access.md) |
 | Understand the terminal protocol and session service | [Architecture](docs/architecture.md) |
@@ -32,7 +33,7 @@ For a reading order, use the [documentation index](docs/README.md).
 - Paired clients and encrypted terminal messages. The Mac host accepts an explicit address allowlist.
 - An optional one-command root wrapper using [chris-ritsen/samsung-tv-root](https://github.com/chris-ritsen/samsung-tv-root), plus a runtime-detection patch for the tested Frame.
 
-Root is optional. Installing these web apps uses Samsung's Developer Mode and signing tools. Frame Terminal currently runs shells on the host computer; an interactive shell on the TV itself is future work.
+Root is optional. Installing these web apps uses Samsung's Developer Mode and signing tools. Enable the separate [TV shell backend](docs/tv-shell.md) to acquire root only when you open a TV session.
 
 ## Tested hardware
 
@@ -77,6 +78,7 @@ server/              Local host, real PTYs and reconnect screen state
 shared/              Client/host cryptographic transport
 study-tv-lab/        Small clock, OK and Back example (StudyTVLab)
 scripts/             Pairing, build, deploy and macOS service helpers
+tv-pty/              Managed reverse-TLS PTY helper for the TV
 patches/             Patch against a pinned upstream root-tool revision
 tests/               Real PTY and transport tests
 docs/                Setup, development, access and troubleshooting guides

@@ -87,4 +87,4 @@ The wrapper exits after the command and the upstream cleanup sequence. Root isn'
 
 Upstream stages files under the SDK tools temporary area on the TV. An interrupted run can leave staging files on persistent user storage. Its cleanup and system-file checks describe that run; they aren't a blanket guarantee that any arbitrary root command is harmless. If cleanup reports a failure, save the evidence and consult the pinned upstream recovery/source documentation before removing files manually. A reboot ends volatile runtime state, but doesn't prove that persistent staging files were removed.
 
-For a TV-resident shell inside Frame Terminal, a separate authenticated backend and lifecycle design are still needed. The shipped UI currently connects to host PTYs only.
+For an interactive TV PTY in Frame Terminal, enable the [TV shell backend](tv-shell.md). It holds this archive route for the session, uses a pinned TLS callback for terminal traffic, and verifies cleanup when the shell ends. The one-command wrapper above remains available independently.

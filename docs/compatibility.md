@@ -14,6 +14,7 @@ Initial hardware validation was completed on 20 October 2026. This table describ
 | Multiple sessions | Real macOS PTYs and browser interface | Create, isolation, resize, rename, switch, reconnect and close verified |
 | Mac host | Apple Silicon, Node 25.2.1 | Native PTY module and user LaunchAgent worked |
 | Archive root | Pinned upstream plus runtime patch | Authenticated `uid=0`; cleanup and system-file checks reported true |
+| Interactive TV root | Native `script` PTY, .NET helper and pinned TLS callback | UID 0, persistent state, resize, Ctrl+C and shell exit/cleanup confirmed |
 
 The app manifest requests Tizen 6.0 or newer. That lower bound hasn't been validated on older TVs. Keyboard modifiers, non-US layouts, every terminal application, suspend/resume scenarios and multi-day operation haven't all been checked. These are useful areas for further testing.
 

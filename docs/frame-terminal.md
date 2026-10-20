@@ -2,6 +2,8 @@
 
 Frame Terminal displays real host shells on a Samsung TV. On the tested Mac, each session is a separate `/bin/zsh -l` process on a PTY. Shell variables, working directories and running commands belong to that session. The TV renders the terminal and sends input.
 
+The optional [TV root backend](tv-shell.md) adds a television Bash session to the same list, clearly labelled `ROOT`. It is disabled until explicitly configured on the host.
+
 ## Install
 
 With the [SDK](prerequisites.md), [Developer Mode](developer-mode.md) and [signing profile](signing.md) ready:
@@ -28,11 +30,13 @@ On the TV, wait for the host name and a prompt. Type `pwd`, press Enter, then cr
 | --- | --- |
 | Typing, arrows, Tab, Esc, Ctrl/Alt combinations | Terminal input while the shell has focus |
 | Ctrl Shift N | Create a session |
+| Ctrl Shift T | Open or return to the TV root session, when enabled |
 | Ctrl Shift Left / Right | Switch between sessions |
 | Ctrl Shift P | Toggle typing and app controls |
 | Remote Back | Open controls, or return to typing |
 | Remote arrows and OK in controls | Move focus and activate a button |
-| New session | Start another shell, up to eight |
+| Mac session | Start another Mac shell, up to eight sessions total |
+| TV root shell | Open or return to the optional TV root session |
 | Rename | Change the selected session's label |
 | Close | End the selected shell, after confirmation |
 | A− / A+ | Change terminal text size |
@@ -71,6 +75,9 @@ Files in the data directory:
 | `host.json` | Host private/public key, allowed client public keys, addresses, ports and shell settings |
 | `study-tv.json` | TV client private key, host public key and host endpoint; historical filename |
 | `host.log`, `host-error.log` | LaunchAgent output/error logs |
+| `tv-root.json` | Optional TV backend paths, endpoint and TLS certificate pin |
+| `tv-root-cert.pem`, `tv-root-key.pem` | Private local TLS identity for the TV callback |
+| `tv-root-last-cleanup.json` | Last TV session cleanup result |
 
 Directories are created with mode `0700`; pairing JSON files with `0600`. If you choose a custom data directory outside the repository, keep it private and don't commit it elsewhere. `npm run build` embeds the client settings into `dist/frame-terminal/connection.js` and generates the manifest origin.
 

@@ -119,6 +119,11 @@ test('old pairing challenges fail and large screen restores remain encrypted', (
 test('invalid sizes, names and session limits return errors without killing the connection', async t => {
   const { host, url } = await fixture(t);
   const c = await client(url); t.after(() => c.close()); await c.auth();
+  c.send({ type: 'create', kind: 'tv', cols: 80, rows: 24 });
+  assert.match((await c.next(x => x.type === 'error')).message, /not enabled/);
+  c.send({ type: 'create', kind: 'arbitrary-target', cols: 80, rows: 24 });
+  assert.match((await c.next(x => x.type === 'error')).message, /Unknown session target/);
+  assert.equal(host.sessions.list().length, 0);
   c.send({ type: 'create', cols: -1, rows: 20 });
   assert.match((await c.next(x => x.type === 'error')).message, /Invalid terminal size/);
   for (let i = 0; i < 8; i++) { c.send({ type: 'create', cols: 80, rows: 24 }); await c.next(x => x.type === 'created'); }

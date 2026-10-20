@@ -1,6 +1,6 @@
 {
   "name": "democratizen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Build your own Samsung Tizen TV apps, with a Mac terminal and practical guides to developer and root access.",
   "license": "MIT",
@@ -16,6 +16,9 @@
     "deploy": "sh scripts/deploy-frame-terminal.sh",
     "deploy:hello": "sh scripts/deploy-study-tv-lab.sh",
     "root:setup": "sh scripts/setup-tv-root.sh",
+    "tv:build": "sh scripts/build-tv-pty.sh",
+    "tv:enable": "node scripts/enable-tv-root.mjs",
+    "tv:verify": "node scripts/verify-tv-root.mjs",
     "service:install": "node scripts/service.mjs install",
     "service:stop": "node scripts/service.mjs stop",
     "service:status": "node scripts/service.mjs status"

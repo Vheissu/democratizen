@@ -21,3 +21,5 @@ dist/
 .venv/
 __pycache__/
 *.pyc
+tv-pty/bin/
+tv-pty/obj/

@@ -43,5 +43,8 @@ export function setup() {
   return readConfig();
 }
 export function readConfig() {
-  return { host: JSON.parse(fs.readFileSync(path.join(dataDir, 'host.json'), 'utf8')), client: JSON.parse(fs.readFileSync(path.join(dataDir, 'study-tv.json'), 'utf8')) };
+  const host = JSON.parse(fs.readFileSync(path.join(dataDir, 'host.json'), 'utf8'));
+  const rootFile = path.join(dataDir, 'tv-root.json');
+  if (fs.existsSync(rootFile)) host.tvRoot = JSON.parse(fs.readFileSync(rootFile, 'utf8'));
+  return { host, client: JSON.parse(fs.readFileSync(path.join(dataDir, 'study-tv.json'), 'utf8')) };
 }

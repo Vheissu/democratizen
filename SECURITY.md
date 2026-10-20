@@ -35,7 +35,7 @@ If a Samsung author certificate or password was exposed, use Samsung's certifica
 
 ## Root tooling
 
-The optional root route executes privileged TV commands and stages temporary payloads. Its returned identity/cleanup checks describe that execution; arbitrary root commands can still write persistent state. The wrapper doesn't automatically run from the terminal service or on login. Read [the root guide](docs/root-access.md) and the pinned upstream code before using it.
+The optional root route executes privileged TV commands and stages temporary payloads. Its returned identity/cleanup checks describe that execution; arbitrary root commands can still write persistent state. Root acquisition happens only for an explicit TV session or one-command wrapper invocation. It doesn't run at login. The [TV shell backend](docs/tv-shell.md) uses a pinned TLS callback, a fresh session token and verified UID/EUID 0. The initial SDB/root-agent bootstrap remains a trusted-LAN operation with unencrypted components. Read [the root guide](docs/root-access.md) and pinned upstream code before enabling it.
 
 ## Reporting a vulnerability
 

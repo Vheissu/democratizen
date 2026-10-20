@@ -29,3 +29,12 @@ jobs:
         run: npm run build
       - name: Check shell scripts
         run: for script in scripts/*.sh; do sh -n "$script"; done
+      - name: Check Python bridge syntax
+        run: python3 -m py_compile server/tv-root-session.py
+      - uses: actions/setup-dotnet@v4
+        if: matrix.node == 22
+        with:
+          dotnet-version: 6.0.x
+      - name: Compile TV PTY helper
+        if: matrix.node == 22
+        run: npm run tv:build
