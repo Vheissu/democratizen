@@ -4,9 +4,20 @@
   "private": true,
   "description": "Build your own Samsung Tizen TV apps, with a Mac terminal and practical guides to developer and root access.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/Vheissu/democratizen.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vheissu/democratizen.git"
+  },
   "type": "module",
   "scripts": {
+    "chat:setup": "node scripts/chat-config.mjs",
+    "chat:build": "node scripts/build-frame-chat.mjs",
+    "chat:start": "node server/chat-main.mjs",
+    "chat:deploy": "sh scripts/deploy-frame-chat.sh",
+    "chat:service:install": "node scripts/chat-service.mjs install",
+    "chat:service:stop": "node scripts/chat-service.mjs stop",
+    "chat:service:status": "node scripts/chat-service.mjs status",
+    "chat:verify": "node scripts/verify-chat-engine.mjs",
     "postinstall": "node scripts/prepare-pty.mjs",
     "setup": "node scripts/setup-frame-terminal.mjs",
     "build": "node scripts/build-frame-terminal.mjs",
@@ -29,10 +40,17 @@
     "@xterm/addon-serialize": "0.14.0",
     "@xterm/headless": "6.0.0",
     "@xterm/xterm": "6.0.0",
+    "dompurify": "3.4.17",
+    "marked": "18.1.1",
     "node-pty": "1.1.0",
+    "qrcode": "1.5.4",
     "tweetnacl": "1.0.3",
     "ws": "8.22.0"
   },
-  "devDependencies": { "esbuild": "0.28.2" },
-  "engines": { "node": ">=22" }
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

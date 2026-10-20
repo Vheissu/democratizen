@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Frame Chat</title><link rel="stylesheet" href="bundle.css"></head>
+<body>
+<div id="app">
+  <aside aria-label="Chats">
+    <div class="brand"><span class="brand-mark">✳</span><div>Frame Chat<small>ON YOUR TV</small></div></div>
+    <button id="new-chat" class="new-chat" data-nav>＋ New chat <kbd>Ctrl N</kbd></button>
+    <div class="section-label">YOUR CHATS</div>
+    <nav id="chats" aria-label="Saved chats"></nav>
+    <div class="account"><span id="account-label">Sign in to start chatting</span><small id="plan-label">Use your ChatGPT subscription</small><button id="account-button" data-nav>Sign in with ChatGPT</button></div>
+    <div class="connection"><span id="connection-dot"></span><span id="connection-label">Connecting to Mac…</span></div>
+  </aside>
+  <main>
+    <header><div class="selectors"><label><span class="sr-only">Model</span><select id="model" aria-label="Model" data-nav></select></label><label><span class="sr-only">Reasoning effort</span><select id="effort" aria-label="Reasoning effort" data-nav></select></label></div><div class="header-actions"><button id="smaller" aria-label="Smaller text" data-nav>A−</button><button id="larger" aria-label="Larger text" data-nav>A+</button><button id="rename" data-nav>Rename</button><button id="remove" data-nav>Archive</button></div></header>
+    <section id="conversation" tabindex="0" aria-label="Conversation" data-nav>
+      <div id="welcome"><span class="welcome-mark">✳</span><h1>What would you like<br>to talk about?</h1><p>A little more room for your ideas.</p><div class="suggestions"><button data-prompt="Explain a surprising scientific idea in plain English." data-nav>Learn something new <span>↗</span></button><button data-prompt="Help me turn a rough idea into a practical plan. Start by asking what I have in mind." data-nav>Think through an idea <span>↗</span></button><button data-prompt="Help me understand a piece of code. Ask me to paste it." data-nav>Talk about code <span>↗</span></button></div></div>
+      <div id="messages"></div>
+    </section>
+    <div class="composer-area"><div id="reply-status" role="status"></div><form id="composer"><textarea id="prompt" rows="2" maxlength="16000" placeholder="Ask anything" aria-label="Message" data-nav></textarea><div class="composer-bottom"><span>Enter to send · Shift Enter for a new line</span><button id="send" type="submit" aria-label="Send message" data-nav>↑</button><button id="stop" type="button" data-nav hidden>■ Stop</button></div></form><div class="footnote"><span>Powered by Codex · Check important answers.</span><button id="help" data-nav>Keyboard & remote</button></div></div>
+  </main>
+</div>
+<div id="toast" role="status" hidden></div>
+<div id="modal" class="modal" hidden><section role="dialog" aria-modal="true" aria-labelledby="modal-title"><button id="modal-close" class="modal-close" aria-label="Close dialog" data-nav>×</button><div class="section-label">FRAME CHAT</div><h2 id="modal-title"></h2><div id="modal-body"></div><div id="modal-actions"></div></section></div>
+<script src="connection.js"></script><script src="bundle.js"></script>
+</body></html>

@@ -1,0 +1,20 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { build } from 'esbuild';
+import { createHash } from 'node:crypto';
+import { chatSetup, workspace } from './chat-config.mjs';
+const { client } = chatSetup();
+const output = path.join(workspace, 'dist/frame-chat');
+await fs.mkdir(output, { recursive: true, mode: 0o700 });
+await build({ entryPoints: [path.join(workspace, 'chat-app/main.js')], bundle: true, outfile: path.join(output, 'bundle.js'), minify: true, target: 'chrome85' });
+for (const name of ['index.html', 'icon.png']) await fs.copyFile(path.join(workspace, 'chat-app', name), path.join(output, name));
+const buildId = createHash('sha256').update(await fs.readFile(path.join(output, 'bundle.js'))).update(await fs.readFile(path.join(output, 'bundle.css'))).digest('hex').slice(0, 12);
+await fs.writeFile(path.join(output, 'connection.js'), `window.FRAME_CHAT_CONNECTION=${JSON.stringify({ ...client, buildId })};\n`, { mode: 0o600 });
+const manifest = (await fs.readFile(path.join(workspace, 'chat-app/config.xml'), 'utf8')).replaceAll('HOST', client.host).replaceAll('4321', String(client.port));
+await fs.writeFile(path.join(output, 'config.xml'), manifest);
+await fs.copyFile(path.join(workspace, 'LICENSE'), path.join(output, 'LICENSE'));
+const licenses = path.join(output, 'licenses'); await fs.mkdir(licenses, { recursive: true });
+for (const [dependency, name] of [['tweetnacl', 'LICENSE'], ['marked', 'LICENSE'], ['dompurify', 'LICENSE'], ['qrcode', 'license']]) await fs.copyFile(path.join(workspace, 'node_modules', dependency, name), path.join(licenses, dependency + '.txt'));
+let bytes = 0;
+for (const name of await fs.readdir(output)) { const stat = await fs.stat(path.join(output, name)); if (stat.isFile()) bytes += stat.size; }
+console.log(`Built Frame Chat ${buildId}: ${(bytes / 1024).toFixed(1)} KiB of app files; connected to ${client.host}:${client.port}`);

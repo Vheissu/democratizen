@@ -113,11 +113,13 @@ export function createHost(config, { previewDir, maxSessions = 8, tvFactory } = 
   if (previewDir) {
     const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png' };
     preview = http.createServer((req, res) => {
+      const port = preview.address().port;
+      if (![`127.0.0.1:${port}`, `localhost:${port}`].includes(req.headers.host) || (req.headers.origin && req.headers.origin !== `http://${req.headers.host}`) || (req.headers['sec-fetch-site'] === 'cross-site' && req.headers['sec-fetch-mode'] !== 'navigate')) { res.writeHead(403); res.end(); return; }
       let pathname;
       try { pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); } catch { res.writeHead(400); res.end(); return; }
       const filename = path.resolve(previewDir, '.' + (pathname === '/' ? '/index.html' : pathname));
       if (!filename.startsWith(path.resolve(previewDir) + path.sep) || !fs.existsSync(filename) || !fs.statSync(filename).isFile()) { res.writeHead(404); res.end(); return; }
-      res.writeHead(200, { 'Content-Type': types[path.extname(filename)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': `default-src 'self'; connect-src ws://${config.listenHost}:${config.port}; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'` });
+      res.writeHead(200, { 'Content-Type': types[path.extname(filename)] || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Cross-Origin-Resource-Policy': 'same-origin', 'Content-Security-Policy': `default-src 'self'; connect-src ws://${config.listenHost}:${config.port}; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'` });
       fs.createReadStream(filename).pipe(res);
     });
   }

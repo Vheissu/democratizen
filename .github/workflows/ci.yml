@@ -26,7 +26,9 @@ jobs:
         env:
           TV_IP: 192.0.2.50
           FRAME_HOST: 192.0.2.10
-        run: npm run build
+        run: |
+          npm run build
+          npm run chat:build
       - name: Check shell scripts
         run: for script in scripts/*.sh; do sh -n "$script"; done
       - name: Check Python bridge syntax

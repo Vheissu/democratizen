@@ -1,5 +1,7 @@
 # Security
 
+Frame Chat keeps its OpenAI login in a separate private Codex profile on the Mac. Account tokens are never bundled in the TV widget or returned over the companion protocol. Its host exposes a fixed set of chat operations, checks chat ownership against the current account, disables shell/app/plugin tools, and rejects requests from unpaired clients. Model Markdown is sanitised before rendering; embedded images and active HTML are omitted. See [Frame Chat](docs/frame-chat.md) for storage, sign-in and deployment details.
+
 Frame Terminal can execute commands as the host user. Its pairing keys are access credentials. A paired TV should be trusted at the same level as another terminal logged in as that user.
 
 ## Intended deployment

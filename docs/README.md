@@ -8,6 +8,7 @@
 4. [Your first TV app](first-app.md): build, sign, install and launch the included clock.
 5. [Frame Terminal](frame-terminal.md): pair the host, deploy the terminal and use a keyboard.
 6. [TV root shell](tv-shell.md): enable the optional TV backend and switch between machines.
+7. [Frame Chat](frame-chat.md): use a ChatGPT subscription through a small TV client and Mac companion.
 
 ## Build and investigate
 

@@ -15,6 +15,10 @@ Initial hardware validation was completed on 20 October 2026. This table describ
 | Mac host | Apple Silicon, Node 25.2.1 | Native PTY module and user LaunchAgent worked |
 | Archive root | Pinned upstream plus runtime patch | Authenticated `uid=0`; cleanup and system-file checks reported true |
 | Interactive TV root | Native `script` PTY, .NET helper and pinned TLS callback | UID 0, persistent state, resize, Ctrl+C and shell exit/cleanup confirmed |
+| Frame Chat | `framechat0.FrameChat`, Tizen Chromium 120, 1920×1080 | Signed widget installed, launched and established its encrypted companion connection |
+| Chat subscription engine | Codex `0.163.0-alpha.10.2` bundled with ChatGPT `26.1013.40934` | Real Pro-plan response, follow-up context and engine-restart recovery verified on the Mac |
+| Chat interface | Browser preview at TV resolution | Keyboard submission, Markdown, streamed replies, Stop and reload restoration verified |
+| Chat sign-in | Official device-code flow | Code/QR generation and navigation to OpenAI's passkey challenge verified; account-owner passkey completion remains a user action |
 
 The app manifest requests Tizen 6.0 or newer. That lower bound hasn't been validated on older TVs. Keyboard modifiers, non-US layouts, every terminal application, suspend/resume scenarios and multi-day operation haven't all been checked. These are useful areas for further testing.
 
