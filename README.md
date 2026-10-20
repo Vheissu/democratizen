@@ -6,6 +6,18 @@ democratizen is a practical starting point for making Samsung Tizen TVs your own
 
 The first app is **Frame Terminal**: shells on your Mac and an optional root shell on the TV, with up to eight sessions and keyboard input. Switch between machines in the sidebar. Leave the TV app and reconnect while the host and TV stay online to restore your sessions.
 
+## Frame Terminal in use
+
+Captured from the running browser preview, connected to the Mac host and a Samsung Frame TV.
+
+**Mac development session**
+
+![Frame Terminal showing a Mac development shell, with Mac and TV sessions in the sidebar](docs/images/frame-terminal-mac.png)
+
+**TV root shell**, showing UID 0 and the TV's native Linux terminal.
+
+![Frame Terminal connected to the Samsung TV's root shell, showing UID 0, Linux and its PTY](docs/images/frame-terminal-tv-root.png)
+
 ## Start here
 
 | I want to… | Read |
