@@ -1,0 +1,30 @@
+diff --git a/src/samsung_tv_root/archive_root.py b/src/samsung_tv_root/archive_root.py
+index 95e96ec..ff7f0b7 100644
+--- a/src/samsung_tv_root/archive_root.py
++++ b/src/samsung_tv_root/archive_root.py
+@@ -84,16 +84,22 @@ def _check_target(client: SdbClient) -> TargetAssessment:
+         raise ArchiveRootError(
+             "sdbd-tarlauncher lacks effective SETUID/SETGID capabilities"
+         )
+-    runtimes = _capture(client, "/usr/bin/dotnet --list-runtimes")
++    try:
++        runtimes = _capture(client, "/usr/bin/dotnet --list-runtimes")
++    except ArchiveRootError as error:
++        if "Unknown option --list-runtimes" not in str(error):
++            raise
++        # Samsung's TV launcher does not implement the standard dotnet CLI flag.
++        runtimes = _capture(client, "ls /usr/share/dotnet/shared/Microsoft.NETCore.App")
+     majors = {
+         int(match.group(1))
+         for line in runtimes.splitlines()
+-        if (match := re.match(r"Microsoft\.NETCore\.App (\d+)\.\d+\.\d+\s+\[", line))
++        if (match := re.match(r"(?:Microsoft\.NETCore\.App )?(\d+)\.\d+\.\d+(?:\s+\[|$)", line))
+     }
+     if any(major >= 6 for major in majors):
+         runtime = "6.0"
+     elif 3 in majors and any(
+-        re.match(r"Microsoft\.NETCore\.App 3\.1\.\d+\s+\[", line)
++        re.match(r"(?:Microsoft\.NETCore\.App )?3\.1\.\d+(?:\s+\[|$)", line)
+         for line in runtimes.splitlines()
+     ):
+         runtime = "3.1"

@@ -1,0 +1,20 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #f9f7f0;
+  background: #142026;
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; }
+.screen {
+  --accent: #e4b46a;
+  width: 100%; height: 100%; min-height: 100vh;
+  padding: 7vh 7vw;
+  display: flex; flex-direction: column; justify-content: center;
+  background: radial-gradient(circle at 77% 25%, rgba(228,180,106,.12), transparent 36%), #142026;
+}
+.screen.alt { --accent: #7ed0cb; background: radial-gradient(circle at 77% 25%, rgba(126,208,203,.12), transparent 36%), #142026; }
+.eyebrow { color: var(--accent); font-size: 1.3rem; font-weight: 700; letter-spacing: .22em; }
+.clock { margin-top: 2vh; font-size: clamp(7rem, 17vw, 20rem); font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; }
+.date { margin-top: 2vh; font-size: clamp(1.5rem, 2.8vw, 3rem); }
+.status { margin-top: 7vh; color: var(--accent); font-size: clamp(1.4rem, 2.3vw, 2.5rem); }
+.hint { margin: 2vh 0 0; color: #c5c9c6; font-size: clamp(1.1rem, 1.7vw, 2rem); }

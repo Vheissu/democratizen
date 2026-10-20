@@ -1,0 +1,35 @@
+{
+  "name": "democratizen",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build your own Samsung Tizen TV apps, with a Mac terminal and practical guides to developer and root access.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/Vheissu/democratizen.git" },
+  "type": "module",
+  "scripts": {
+    "postinstall": "node scripts/prepare-pty.mjs",
+    "setup": "node scripts/setup-frame-terminal.mjs",
+    "build": "node scripts/build-frame-terminal.mjs",
+    "start": "node server/main.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "docs:check": "node scripts/check-docs.mjs",
+    "deploy": "sh scripts/deploy-frame-terminal.sh",
+    "deploy:hello": "sh scripts/deploy-study-tv-lab.sh",
+    "root:setup": "sh scripts/setup-tv-root.sh",
+    "service:install": "node scripts/service.mjs install",
+    "service:stop": "node scripts/service.mjs stop",
+    "service:status": "node scripts/service.mjs status"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-serialize": "0.14.0",
+    "@xterm/headless": "6.0.0",
+    "@xterm/xterm": "6.0.0",
+    "node-pty": "1.1.0",
+    "tweetnacl": "1.0.3",
+    "ws": "8.22.0"
+  },
+  "devDependencies": { "esbuild": "0.28.2" },
+  "engines": { "node": ">=22" }
+}

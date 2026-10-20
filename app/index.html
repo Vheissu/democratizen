@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Frame Terminal</title>
+  <link rel="stylesheet" href="bundle.css">
+</head>
+<body>
+  <main id="app">
+    <aside class="sidebar" aria-label="Sessions">
+      <div class="brand"><span class="brand-icon">&gt;_</span><div>FRAME<span>TERMINAL</span></div></div>
+      <div class="section-label">ON YOUR MAC <span id="session-count">0 / 8</span></div>
+      <nav id="sessions" aria-label="Mac shell sessions"></nav>
+      <button id="new-session" class="new-session" data-nav><b>+</b> New session</button>
+      <div class="sidebar-bottom"><span class="small-dot"></span> PAIRED TO THIS FRAME<p id="host-address"></p><p class="muted">Your shells stay open when<br>you leave the app.</p></div>
+    </aside>
+    <section class="workspace">
+      <header>
+        <div class="heading"><span class="breadcrumb">MAC /</span><h1 id="session-name">Connecting</h1><span id="size" class="muted"></span></div>
+        <div class="header-actions"><span id="connection" role="status">Connecting…</span><button id="smaller" data-nav aria-label="Smaller terminal text">A−</button><button id="larger" data-nav aria-label="Larger terminal text">A+</button><button id="rename" data-nav>Rename</button><button id="close-session" data-nav>Close</button></div>
+      </header>
+      <div id="terminal-wrap"><div id="terminal" aria-label="Mac terminal"></div><div id="overlay"><div class="overlay-icon">&gt;_</div><h2 id="overlay-title">Connecting to your Mac</h2><p id="overlay-message">Opening your paired connection.</p><button id="retry" data-nav hidden>Try again</button></div></div>
+      <footer>
+        <div class="special-keys" aria-label="Terminal keys"><button data-key="esc" data-nav>Esc</button><button data-key="tab" data-nav>Tab ⇥</button><button data-key="ctrlc" data-nav>Ctrl C</button><button data-key="ctrld" data-nav>Ctrl D</button><button data-key="up" data-nav>↑</button><button data-key="down" data-nav>↓</button><button data-key="left" data-nav>←</button><button data-key="right" data-nav>→</button><button id="type" data-nav>Type in terminal ↵</button></div>
+        <div id="hint">Keyboard ready · Ctrl Shift N: new session · Remote Back: controls</div>
+      </footer>
+    </section>
+  </main>
+  <div id="toast" role="alert" hidden></div>
+  <div id="modal" class="modal" hidden><form id="modal-form"><span class="section-label">SESSION</span><h2 id="modal-title"></h2><p id="modal-message"></p><input id="modal-input" maxlength="40" autocomplete="off" aria-label="Session name"><div class="modal-actions"><button type="button" id="modal-cancel" data-nav>Cancel</button><button type="submit" id="modal-confirm" data-nav>Save</button></div></form></div>
+  <script src="connection.js"></script><script src="bundle.js"></script>
+</body>
+</html>
