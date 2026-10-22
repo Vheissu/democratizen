@@ -3,6 +3,7 @@
   "appName": "Afterstrain",
   "webDir": "dist",
   "backgroundColor": "#071514",
+  "plugins": { "SystemBars": { "style": "DARK", "insetsHandling": "native" } },
   "android": { "backgroundColor": "#071514" },
   "ios": { "backgroundColor": "#071514", "contentInset": "never" }
 }
