@@ -56,11 +56,11 @@ ANDROID_HOME="$HOME/Library/Android/sdk" ./gradlew assembleDebug
 
 Output: `android/app/build/outputs/apk/debug/app-debug.apk`. The manifest supports Android TV launchers and does not require a touchscreen. Android TV is supported; this repository does not contain an Apple TV / tvOS target.
 
-For an unsigned iOS simulator build:
+For an iOS simulator build with local ad-hoc signing:
 
 ```sh
 xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator \
-  -configuration Debug -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO build
+  -configuration Debug -derivedDataPath build/ios CODE_SIGN_IDENTITY=- build
 ```
 
 Device distribution still needs your Apple signing team or Android release keystore. Store listings, store submission, signed release builds, and physical controller certification are not included.
@@ -69,9 +69,16 @@ Device distribution still needs your Apple signing team or Android release keyst
 
 ```sh
 npm test
+npm run test:controls
 npm run build
 npm audit
 ```
+
+Controller regression checks use Playwright Chromium (`npx playwright install chromium` on a new machine). They exercise phone and TV layouts, every directional focus destination, held input, reconnects, purchases, and simulation controls. The CI workflow runs these checks.
+
+For native Android checks, install and launch the debug APK on an emulator, then run `node tests/controller.android.mjs`. Set `ANDROID_SERIAL` and `ADB` if needed. The test sends Android key events through the activity and uses the debug WebView only for setup and assertions. Analog hold/release, hat axes, dead zones, disconnects, and background cleanup are covered by `cd android && ./gradlew :app:connectedDebugAndroidTest`.
+
+For iOS, use a scratch simulator and run `AFTERSTRAIN_SIMULATOR=<booted-simulator-uuid> bash scripts/test-ios-controller.sh`. This builds, installs, launches, and checks native GameController snapshot inputs against the running WKWebView. The harness is compiled only in Debug and runs only with `--controller-smoke`. It creates a test run in that simulator's save slot. The script returns nonzero on failure and prints the individual checks. Native simulator builds use local ad-hoc signing; no Apple distribution credentials are required.
 
 Tests cover deterministic runs, save/resume equivalence, trait prerequisites and costs, synergies, corrupt saves, custom world settings, victory and defeat, population bounds across seeds/scenarios, and a complete winning strategy. The benchmark reports CPU time per simulated day on the host; it is not a mobile-device performance guarantee.
 

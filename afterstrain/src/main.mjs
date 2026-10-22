@@ -27,7 +27,6 @@ let audioContext;
 let previousButtons = [];
 let lastMove = 0;
 let lastFrame = 0;
-let nativeController = false;
 const paths = world.map(country => {
   const path = new Path2D();
   for (const ring of country.rings) {
@@ -244,22 +243,30 @@ document.addEventListener('keydown', event => {
   else if (event.code === 'Space' || event.key === 'MediaPlayPause') { event.preventDefault(); if (state && screen === 'world') action(`speed-${speed ? 0 : 1}`); }
 });
 window.addEventListener('afterstrain-control', event => {
-  nativeController = true;
+  document.documentElement.classList.add('controller-input');
   const command = event.detail;
   if (['up', 'down', 'left', 'right'].includes(command)) moveFocus(command);
-  else if (command === 'select') document.activeElement?.click();
+  else if (command === 'select') selectFocused();
   else if (command === 'back') back();
   else if (command === 'pause' && state && screen === 'world') action(`speed-${speed ? 0 : 1}`);
   else if (['region-next', 'region-prev'].includes(command) && state && screen === 'world') action(command);
 });
+function selectFocused() {
+  const active = document.activeElement;
+  if (active?.matches('input')) { active.blur(); moveFocus('down'); }
+  else if (active?.matches('button:not(:disabled)')) active.click();
+  else root.querySelector('button.primary:not(:disabled),button:not(:disabled)')?.focus();
+}
+document.addEventListener('pointerdown', () => document.documentElement.classList.remove('controller-input'));
 function pollController(now) {
-  if (now - lastFrame >= 50 && !document.hidden && !nativeController) {
+  if (now - lastFrame >= 50 && !document.hidden && !Capacitor.isNativePlatform()) {
     lastFrame = now;
     const pad = [...(navigator.getGamepads?.() || [])].find(Boolean);
     if (pad) {
+      document.documentElement.classList.add('controller-input');
       const buttons = pad.buttons.map(item => item.pressed);
       const press = index => buttons[index] && !previousButtons[index];
-      if (press(0)) { if (document.activeElement?.matches('input')) document.activeElement.blur(); else document.activeElement?.click(); }
+      if (press(0)) selectFocused();
       if (press(1)) back();
       if (press(9) && state && screen === 'world') action(`speed-${speed ? 0 : 1}`);
       if (press(4) && state && screen === 'world') action('region-prev');

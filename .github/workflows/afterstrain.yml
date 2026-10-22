@@ -25,5 +25,7 @@ jobs:
           cache-dependency-path: afterstrain/package-lock.json
       - run: npm ci
       - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:controls
       - run: npm run build
       - run: npm audit --audit-level=high
