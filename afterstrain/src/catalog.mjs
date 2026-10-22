@@ -17,13 +17,13 @@ export const GENOMES = [
 ];
 
 const branches = [
-  ['reach', 'Reach', 'spread', ['Signal bloom', 'Thread network', 'Echo chamber', 'Resonant field', 'Cascade', 'Horizon pulse'], 'Expands local influence.', 0.16],
+  ['reach', 'Reach', 'spread', ['Signal bloom', 'Thread network', 'Echo chamber', 'Resonant field', 'Cascade', 'Horizon pulse'], 'Increases local spread.', 0.16],
   ['travel', 'Migration', 'travel', ['Drifting motes', 'Wayfinder', 'Long wave', 'Crosscurrent', 'Open circuit', 'World chorus'], 'Improves passage between regions.', 0.2],
   ['veil', 'Concealment', 'stealth', ['Soft edges', 'Quiet phase', 'Mirror shell', 'False dawn', 'Ghost pattern', 'Silent orbit'], 'Delays global awareness.', 0.17],
   ['resist', 'Resilience', 'resist', ['Anchor', 'Layered shell', 'Deep roots', 'Memory mesh', 'Redundancy', 'Last light'], 'Slows the research response.', 0.18],
-  ['cold', 'Cold adaptation', 'cold', ['Frost thread', 'Winter bloom', 'Polar lens', 'Ice memory', 'Rime bridge', 'White horizon'], 'Strengthens influence in cold regions.', 0.22],
-  ['warm', 'Heat adaptation', 'warm', ['Sun thread', 'Amber skin', 'Desert song', 'Heat mirror', 'Solar fold', 'Burning horizon'], 'Strengthens influence in warm regions.', 0.22],
-  ['impact', 'Disruption', 'impact', ['Restless nights', 'Heavy air', 'Faded colours', 'Static dreams', 'Lost rhythm', 'Long eclipse'], 'Increases disruption, but attracts attention.', 0.2],
+  ['cold', 'Cold adaptation', 'cold', ['Frost thread', 'Winter bloom', 'Polar lens', 'Ice memory', 'Rime bridge', 'White horizon'], 'Strengthens spread in cold regions.', 0.22],
+  ['warm', 'Heat adaptation', 'warm', ['Sun thread', 'Amber skin', 'Desert song', 'Heat mirror', 'Solar fold', 'Burning horizon'], 'Strengthens spread in warm regions.', 0.22],
+  ['impact', 'Disruption', 'impact', ['Restless nights', 'Heavy air', 'Faded colours', 'Static dreams', 'Lost rhythm', 'Long eclipse'], 'Increases mortality and public awareness.', 0.2],
   ['drift', 'Instability', 'drift', ['Split pattern', 'Wild branch', 'Unwritten code', 'Shifting form', 'Fractal echo', 'Infinite garden'], 'Encourages spontaneous trait changes.', 0.25],
 ];
 export const BRANCHES = branches.map(([id, name]) => ({ id, name }));
@@ -32,10 +32,10 @@ export const TRAITS = branches.flatMap(([branch, , stat, names, description, val
   requires: tier ? `${branch}-${tier - 1}` : null,
 })));
 export const SCENARIOS = [
-  { id: 'frontier', name: 'Open frontier', description: 'Reach 75% global influence before the response catches you.', target: 0.75, research: 1 },
-  { id: 'silent', name: 'The quiet world', description: 'Reach 50% influence. Awareness above 65% ends the run.', target: 0.5, research: 0.8, awarenessLimit: 65 },
-  { id: 'race', name: 'Against the clock', description: 'Reach 60% influence within 240 days. Research moves faster.', target: 0.6, research: 1.4, deadline: 240 },
-  { id: 'endurance', name: 'Long winter', description: 'A colder world. Reach 85% influence against a patient response.', target: 0.85, research: 0.65, temperature: -20 },
+  { id: 'frontier', name: 'Open frontier', description: 'Reach 75% global infection before the response catches you.', target: 0.75, research: 1 },
+  { id: 'silent', name: 'The quiet world', description: 'Reach 50% infection. Awareness above 65% ends the run.', target: 0.5, research: 0.8, awarenessLimit: 65 },
+  { id: 'race', name: 'Against the clock', description: 'Reach 60% infection within 240 days. Research moves faster.', target: 0.6, research: 1.4, deadline: 240 },
+  { id: 'endurance', name: 'Long winter', description: 'A colder world. Reach 85% infection against a patient response.', target: 0.85, research: 0.65, temperature: -20 },
   { id: 'sandbox', name: 'Sandbox', description: 'Unlimited evolution points, no defeat, and a world to experiment with.', target: 1, research: 0 },
 ];
 export const EVENTS = [

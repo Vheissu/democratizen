@@ -33,7 +33,7 @@ export function createGame(world, options = {}) {
     population: Math.round((0.5e6 + random(state) ** 2 * 120e6) * state.density),
     health: clamp((0.3 + random(state) * 0.7) * state.capacity, 0.1, 1), connections: (0.4 + random(state) * 0.6) * state.mobility,
     temperature: 32 - Math.abs(country.center[1]) * 0.7 + random(state) * 12 + state.climate,
-    influence: 0, disruption: 0, closed: false, routes: [],
+    influence: 0, disruption: 0, dead: 0, recovered: 0, closed: false, routes: [],
   }));
   for (const country of state.countries) {
     const nearest = state.countries.filter(other => other.id !== country.id).sort((left, right) => distance(country, left) - distance(country, right)).slice(0, 4);
@@ -65,7 +65,9 @@ export function stats(state) {
 export function totals(state) {
   const population = state.countries.reduce((total, country) => total + country.population, 0);
   const influenced = state.countries.reduce((total, country) => total + country.population * country.influence, 0);
-  return { population, influenced, fraction: influenced / population, reached: state.countries.filter(country => country.influence > 0).length };
+  const dead = state.countries.reduce((total, country) => total + country.population * country.dead, 0);
+  const recovered = state.countries.reduce((total, country) => total + country.population * country.recovered, 0);
+  return { population, influenced, dead, recovered, active: Math.max(0, influenced - dead - recovered), fraction: influenced / population, reached: state.countries.filter(country => country.influence > 0).length };
 }
 export function cost(state, trait) { return Math.ceil(trait.cost * (1 + (state.traits[trait.id] || 0) * 0.65)); }
 export function canEvolve(state, trait) {
@@ -117,18 +119,23 @@ export function tick(state) {
     }
     country.closed = state.awareness > 45 + country.health * 30;
     if (country.influence <= 0) continue;
+    const active = Math.max(0, country.influence - country.dead - country.recovered);
+    if (active * country.population < 1) continue;
     const temperature = country.temperature + (scenario.temperature || 0);
     const adaptation = temperature < 10 ? attributes.cold + effects.cold : temperature > 25 ? attributes.warm + effects.warm : 0.3;
     const climate = clamp(0.65 + adaptation * 0.4, 0.3, 2.5);
     const defence = 1 - country.health * 0.25 * state.difficulty - state.research / 350;
     const growth = 0.075 * attributes.spread * climate * defence * Math.sqrt(state.density);
-    country.influence = clamp(country.influence + Math.max(0.00004, country.influence * (1 - country.influence) * growth), 0, 1);
+    country.influence = clamp(country.influence + active * (1 - country.influence) * growth, 0, 1);
     country.disruption = clamp(country.influence * (0.08 + attributes.impact * 0.15), 0, 1);
+    const deaths = Math.min(active, active * attributes.impact * 0.008 * (1.2 - country.health * 0.4));
+    country.dead += deaths;
+    country.recovered += Math.min(active - deaths, active * state.research / 100 * country.health * 0.003);
     for (const destination of country.routes) {
       const target = lookup.get(destination);
       if (target.influence > 0) continue;
       const restriction = country.closed || target.closed ? 0.12 : 1;
-      const chance = Math.min(0.4, country.influence * 0.1 * attributes.travel * country.connections * effects.travel * restriction);
+      const chance = Math.min(0.4, active * 0.1 * attributes.travel * country.connections * effects.travel * restriction);
       if (random(state) < chance) incoming.add(destination);
     }
   }
@@ -153,7 +160,7 @@ export function tick(state) {
   if (state.awareness > 8) state.research = clamp(state.research + (0.06 + state.awareness * 0.006) * state.difficulty * scenario.research * researchEffect / (1 + attributes.resist), 0, 100);
   if (state.day % 5 === 0) { state.history.push({ day: state.day, influence: total.fraction, research: state.research }); if (state.history.length > 100) state.history.shift(); }
   if (state.scenario !== 'sandbox') {
-    if (state.research >= 100 || (scenario.awarenessLimit && state.awareness >= scenario.awarenessLimit) || (scenario.deadline && state.day >= scenario.deadline && total.fraction < scenario.target)) state.status = 'lost';
+    if (state.research >= 100 || total.active < 1 || (scenario.awarenessLimit && state.awareness >= scenario.awarenessLimit) || (scenario.deadline && state.day >= scenario.deadline && total.fraction < scenario.target)) state.status = 'lost';
     else if (total.fraction >= scenario.target) state.status = 'won';
     if (state.status !== 'playing') report(state, state.status === 'won' ? 'Your strain has reached its objective.' : 'The world has contained your strain.', 'result');
   }
@@ -178,6 +185,11 @@ export function restore(raw, world) {
       if (country.id !== world[index].id || !validNumber(country.influence, 0, 1) || !validNumber(country.disruption, 0, 1)) return null;
       rebuilt.countries[index].influence = country.influence;
       rebuilt.countries[index].disruption = country.disruption;
+      const dead = country.dead ?? 0;
+      const recovered = country.recovered ?? 0;
+      if (!validNumber(dead, 0, 1) || !validNumber(recovered, 0, 1) || dead + recovered > country.influence + 1e-10) return null;
+      rebuilt.countries[index].dead = dead;
+      rebuilt.countries[index].recovered = recovered;
       rebuilt.countries[index].closed = Boolean(country.closed);
     }
     for (const [id, rank] of Object.entries(saved.traits)) if (!TRAITS.some(trait => trait.id === id) || !Number.isInteger(rank) || rank < 0 || rank > 3) return null;

@@ -61,6 +61,7 @@ test('population, influence and bounds hold across scenarios and seeds', () => {
     const total = totals(state);
     assert.ok(total.influenced <= total.population);
     assert.ok(state.countries.every(country => Number.isFinite(country.influence) && country.influence >= 0 && country.influence <= 1));
+    assert.ok(state.countries.every(country => country.dead >= 0 && country.recovered >= 0 && country.dead + country.recovered <= country.influence + 1e-10));
     assert.ok(state.events.length <= 10 && state.news.length <= 60 && state.history.length <= 100);
     assert.ok(state.points >= 0 && state.research <= 100 && state.awareness <= 100);
     if (scenario.id === 'sandbox') assert.equal(state.status, 'playing');
@@ -107,4 +108,15 @@ test('custom worlds and genome choices affect simulation and survive saves', () 
   assert.ok(stats(custom).travel > stats(baseline).travel);
   for (let day = 0; day < 100; day++) tick(custom);
   assert.deepEqual(restore(serialize(custom), world), custom);
+});
+test('disruptive traits cause deaths and reduce the active spreading population', () => {
+  const state = createGame(world, { scenario: 'sandbox', seed: 'mortality' });
+  state.countries.forEach(country => { country.influence = 0.5; });
+  for (const id of ['impact-0', 'impact-1', 'impact-2']) evolve(state, id);
+  state.research = 50;
+  for (let day = 0; day < 20; day++) tick(state);
+  const total = totals(state);
+  assert.ok(total.dead > 0 && total.recovered > 0);
+  assert.ok(total.active < total.influenced);
+  assert.deepEqual(restore(serialize(state), world), state);
 });

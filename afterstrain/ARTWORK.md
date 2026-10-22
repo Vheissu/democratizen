@@ -12,6 +12,8 @@ Prompt:
 
 ## App icon
 
+Source: `artwork/app-icon-source.png`. Resized copies are installed in the iOS app icon set, Android mipmap resources, and `public/favicon.png`. The title specimen also supplies the native launch images and TV banner.
+
 Prompt:
 
 > Use case: stylized-concept. Asset type: square mobile game app icon. Primary request: original Afterstrain app icon, a single luminous amber core enclosed by a distinctive broken circular translucent teal membrane with three branching gold filaments. Macro science fiction specimen rendered as a bold readable symbol. Deep midnight teal background, high contrast, centered full-bleed square composition, no rounded outer corners. Crisp silhouette recognizable at 48 pixels. No words, letters, logos, watermark or resemblance to existing game icons.

@@ -18,6 +18,7 @@ Open the local address printed by Vite. The complete simulation runs on the devi
 - Eight strain archetypes, five genome biases with tradeoffs, five scenarios, and configurable response strength, volatility, climate, mobility, health capacity, and population density.
 - 48 traits across eight branches, three ranks per trait, prerequisite chains, suppression, six cross-branch synergies, and spontaneous mutations.
 - 20 timed event templates, regional effects, global research shocks, border restrictions, a bounded news history, and influence history.
+- Cumulative infections, active infections, recovery, and deaths. Disruptive traits increase mortality and awareness; only active infections spread. Research improves recovery. Losing every active infection ends a standard run.
 - Seeded runs, a UTC daily seed, automatic saving, validated save imports, browser downloads, and native share-sheet exports.
 - Pause, single-day advance, 1×/3×/8× simulation speeds, optional interface tones, and an in-game field guide.
 
