@@ -1,0 +1,8 @@
+{
+  "appId": "com.rangefront.afterstrain",
+  "appName": "Afterstrain",
+  "webDir": "dist",
+  "backgroundColor": "#071514",
+  "android": { "backgroundColor": "#071514" },
+  "ios": { "backgroundColor": "#071514", "contentInset": "never" }
+}
