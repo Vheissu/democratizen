@@ -1,6 +1,9 @@
 import './style.css';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import world from './data/world.json';
-import { ARCHETYPES, SCENARIOS, TRAITS, BRANCHES, SYNERGIES } from './catalog.mjs';
+import { ARCHETYPES, SCENARIOS, TRAITS, BRANCHES, SYNERGIES, GENOMES } from './catalog.mjs';
 import { createGame, tick, totals, stats, evolve, devolve, cost, canEvolve, serialize, restore } from './engine.mjs';
 
 const root = document.querySelector('#app');
@@ -15,6 +18,7 @@ let speed = 0;
 let selected = 0;
 let branch = 0;
 let setup = { name: 'Echo / 001', seed: newSeed(), archetype: 'echo', scenario: 'frontier', difficulty: 1, chaos: 1, origin: 'random' };
+Object.assign(setup, { genome: 'balanced', climate: 0, mobility: 1, capacity: 1, density: 1 });
 let notice = '';
 let saved = readSave();
 let showRoutes = true;
@@ -23,6 +27,7 @@ let audioContext;
 let previousButtons = [];
 let lastMove = 0;
 let lastFrame = 0;
+let nativeController = false;
 const paths = world.map(country => {
   const path = new Path2D();
   for (const ring of country.rings) {
@@ -84,7 +89,16 @@ function setupView() {
   const archetype = ARCHETYPES.find(item => item.id === setup.archetype);
   const scenario = SCENARIOS.find(item => item.id === setup.scenario);
   const origin = world.find(item => item.id === setup.origin);
-  return `<section class="setup content"><div class="section-heading"><div><p class="eyebrow">NEW EXPEDITION</p><h1>Write the first chapter.</h1></div>${button('Back', 'back')}</div><div class="setup-grid"><div class="specimen"><div class="specimen-label">${escape(archetype.name)}<small>${archetype.description}</small></div></div><div class="settings"><label>STRAIN NAME<input data-key="name" id="strain-name" maxlength="40" value="${escape(setup.name)}" /></label><div class="setting"><span>ORGANISM</span>${button(`${archetype.name} <b>→</b>`, 'organism')}</div><div class="setting"><span>SCENARIO</span>${button(`${scenario.name} <b>→</b>`, 'scenario')}<p>${scenario.description}</p></div><div class="settings-pair"><div class="setting"><span>RESPONSE</span>${button(`${setup.difficulty === 0.6 ? 'Relaxed' : setup.difficulty === 1 ? 'Standard' : 'Relentless'} →`, 'difficulty')}</div><div class="setting"><span>WORLD VOLATILITY</span>${button(`${setup.chaos === 0.5 ? 'Measured' : setup.chaos === 1 ? 'Restless' : 'Chaotic'} →`, 'chaos')}</div></div><div class="setting"><span>STARTING REGION</span><div class="origin-control">${button('←', 'origin-prev', 'aria-label="Previous starting region"')}${button(origin ? escape(origin.name) : 'Surprise me', 'origin-random')}${button('→', 'origin-next', 'aria-label="Next starting region"')}</div></div><label>WORLD SEED<div class="seed-row"><input data-key="seed" id="world-seed" maxlength="80" value="${escape(setup.seed)}" />${button('Shuffle', 'shuffle')}</div></label><p class="muted">Same seed, same starting world. Your decisions change what follows.</p>${button('Release the first signal <span>↗</span>', 'start', 'class="primary"')}</div></div></section>`;
+  return `<section class="setup content"><div class="section-heading"><div><p class="eyebrow">NEW EXPEDITION</p><h1>Write the first chapter.</h1></div>${button('Back', 'back')}</div><div class="setup-grid"><div class="specimen"><div class="specimen-label">${escape(archetype.name)}<small>${archetype.description}</small></div></div><div class="settings"><label>STRAIN NAME<input data-key="name" id="strain-name" maxlength="40" value="${escape(setup.name)}" /></label><div class="setting"><span>ORGANISM</span>${button(`${archetype.name} <b>→</b>`, 'organism')}</div><div class="setting"><span>SCENARIO</span>${button(`${scenario.name} <b>→</b>`, 'scenario')}<p>${scenario.description}</p></div><div class="settings-pair"><div class="setting"><span>RESPONSE</span>${button(`${setup.difficulty === 0.6 ? 'Relaxed' : setup.difficulty === 1 ? 'Standard' : 'Relentless'} →`, 'difficulty')}</div><div class="setting"><span>WORLD VOLATILITY</span>${button(`${setup.chaos === 0.5 ? 'Measured' : setup.chaos === 1 ? 'Restless' : 'Chaotic'} →`, 'chaos')}</div></div><div class="setting"><span>STARTING REGION</span><div class="origin-control">${button('←', 'origin-prev', 'aria-label="Previous starting region"')}${button(origin ? escape(origin.name) : 'Surprise me', 'origin-random')}${button('→', 'origin-next', 'aria-label="Next starting region"')}</div></div><label>WORLD SEED<div class="seed-row"><input data-key="seed" id="world-seed" maxlength="80" value="${escape(setup.seed)}" />${button('Shuffle', 'shuffle')}</div></label><p class="muted">Same seed, same starting world. Your decisions change what follows.</p>${worldControls()}${button('Release the first signal <span>↗</span>', 'start', 'class="primary"')}</div></div></section>`;
+}
+function worldControls() {
+  const genome = GENOMES.find(item => item.id === setup.genome);
+  return `<div class="setting"><span>GENOME BIAS</span>${button(`${genome.name} →`, 'genome')}<p>${genome.description}</p></div><div class="settings-pair">${[
+    ['climate', 'CLIMATE SHIFT', `${setup.climate > 0 ? '+' : ''}${setup.climate}°`],
+    ['mobility', 'TRAVEL NETWORK', `${setup.mobility}×`],
+    ['capacity', 'HEALTH CAPACITY', `${setup.capacity}×`],
+    ['density', 'POPULATION DENSITY', `${setup.density}×`],
+  ].map(([id, label, value]) => `<div class="setting"><span>${label}</span>${button(`${value} →`, `world-${id}`)}</div>`).join('')}</div>`;
 }
 function gameView() {
   const total = totals(state);
@@ -152,17 +166,19 @@ function back() {
   else screen = state ? 'world' : 'menu';
   render();
 }
-function action(command) {
+async function action(command) {
   chirp();
   if (command === 'setup') { speed = 0; save(); screen = 'setup'; }
   else if (command === 'continue') { state = readSave(); if (!state) { notice = 'That save could not be read.'; saved = null; } else { screen = 'world'; speed = 0; selected = state.countries.findIndex(country => country.id === state.origin); } }
-  else if (command === 'daily') { setup = { ...setup, seed: `DAILY-${new Date().toISOString().slice(0, 10)}`, archetype: 'echo', scenario: 'frontier', difficulty: 1, chaos: 1, origin: 'random' }; screen = 'setup'; }
+  else if (command === 'daily') { setup = { ...setup, seed: `DAILY-${new Date().toISOString().slice(0, 10)}`, archetype: 'echo', scenario: 'frontier', difficulty: 1, chaos: 1, origin: 'random', genome: 'balanced', climate: 0, mobility: 1, capacity: 1, density: 1 }; screen = 'setup'; }
   else if (command === 'start') { state = createGame(world, setup); selected = state.countries.findIndex(country => country.id === state.origin); speed = 0; screen = 'world'; save(); }
   else if (command === 'back') return back();
   else if (command === 'exit') { speed = 0; save(); screen = 'menu'; }
   else if (command === 'help') { speed = 0; screen = 'help'; }
   else if (command === 'sound') sound = !sound;
   else if (command === 'organism') setup.archetype = cycle(ARCHETYPES.map(item => item.id), setup.archetype);
+  else if (command === 'genome') setup.genome = cycle(GENOMES.map(item => item.id), setup.genome);
+  else if (command.startsWith('world-')) { const field = command.slice(6); setup[field] = cycle(field === 'climate' ? [-20, -10, 0, 10, 20] : field === 'capacity' ? [0.5, 1, 1.5] : [0.5, 1, 2], setup[field]); }
   else if (command === 'scenario') setup.scenario = cycle(SCENARIOS.map(item => item.id), setup.scenario);
   else if (command === 'difficulty') setup.difficulty = cycle([0.6, 1, 1.6], setup.difficulty);
   else if (command === 'chaos') setup.chaos = cycle([0.5, 1, 2], setup.chaos);
@@ -181,6 +197,13 @@ function action(command) {
   else if (command === 'save') { save(); notice = 'Run saved on this device.'; }
   else if (command === 'export') {
     save();
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const file = await Filesystem.writeFile({ path: 'afterstrain-run.json', data: serialize(state), directory: Directory.Cache, encoding: Encoding.UTF8 });
+        await Share.share({ title: 'Afterstrain saved run', url: file.uri });
+      } catch { notice = 'Export was cancelled or unavailable. Your local save is still stored.'; }
+      render(); return;
+    }
     const url = URL.createObjectURL(new Blob([serialize(state)], { type: 'application/json' }));
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'afterstrain-run.json'; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   } else if (command === 'import') { document.querySelector('#import-file').click(); return; }
@@ -214,14 +237,23 @@ function moveFocus(direction) {
   candidates[0]?.node.focus();
 }
 document.addEventListener('keydown', event => {
-  if (event.target.matches('input') && !['Escape', 'Tab'].includes(event.key)) return;
+  if (event.target.matches?.('input') && !['Escape', 'Tab'].includes(event.key)) return;
   const directions = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
   if (directions[event.key]) { event.preventDefault(); moveFocus(directions[event.key]); }
   else if (event.key === 'Escape' || event.key === 'Backspace' || [10009, 461].includes(event.keyCode)) { event.preventDefault(); back(); }
   else if (event.code === 'Space' || event.key === 'MediaPlayPause') { event.preventDefault(); if (state && screen === 'world') action(`speed-${speed ? 0 : 1}`); }
 });
+window.addEventListener('afterstrain-control', event => {
+  nativeController = true;
+  const command = event.detail;
+  if (['up', 'down', 'left', 'right'].includes(command)) moveFocus(command);
+  else if (command === 'select') document.activeElement?.click();
+  else if (command === 'back') back();
+  else if (command === 'pause' && state && screen === 'world') action(`speed-${speed ? 0 : 1}`);
+  else if (['region-next', 'region-prev'].includes(command) && state && screen === 'world') action(command);
+});
 function pollController(now) {
-  if (now - lastFrame >= 50 && !document.hidden) {
+  if (now - lastFrame >= 50 && !document.hidden && !nativeController) {
     lastFrame = now;
     const pad = [...(navigator.getGamepads?.() || [])].find(Boolean);
     if (pad) {

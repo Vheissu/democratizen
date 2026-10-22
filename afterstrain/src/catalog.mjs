@@ -8,6 +8,13 @@ export const ARCHETYPES = [
   { id: 'prism', name: 'Prism haze', description: 'Unstable, adaptable, expensive to control.', spread: 1.05, stealth: 1, drift: 2 },
   { id: 'umbra', name: 'Umbra chorus', description: 'Patient growth with a powerful late game.', spread: 0.95, stealth: 1.4, drift: 0.6 },
 ];
+export const GENOMES = [
+  { id: 'balanced', name: 'Balanced', description: 'No starting modifiers.', modifiers: {} },
+  { id: 'nomad', name: 'Nomad', description: 'More travel, slower local growth.', modifiers: { travel: 0.7, spread: -0.2 } },
+  { id: 'ghost', name: 'Ghost', description: 'Less awareness, fewer spontaneous mutations.', modifiers: { stealth: 0.7, drift: -0.3 } },
+  { id: 'armour', name: 'Armoured', description: 'Research resistance at the cost of travel.', modifiers: { resist: 0.6, travel: -0.3 } },
+  { id: 'wild', name: 'Wild', description: 'Frequent mutations, less concealment.', modifiers: { drift: 1.2, stealth: -0.3 } },
+];
 
 const branches = [
   ['reach', 'Reach', 'spread', ['Signal bloom', 'Thread network', 'Echo chamber', 'Resonant field', 'Cascade', 'Horizon pulse'], 'Expands local influence.', 0.16],

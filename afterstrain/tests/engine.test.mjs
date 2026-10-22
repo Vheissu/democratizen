@@ -98,3 +98,13 @@ test('simulation benchmark reports per-day cost', () => {
   console.log(`176 regions: ${(elapsed / 1000).toFixed(3)} ms per simulated day`);
   assert.ok(elapsed < 10000);
 });
+test('custom worlds and genome choices affect simulation and survive saves', () => {
+  const baseline = createGame(world, { seed: 'custom' });
+  const custom = createGame(world, { seed: 'custom', genome: 'nomad', climate: 20, mobility: 2, capacity: 0.5, density: 2 });
+  assert.ok(custom.countries[0].temperature > baseline.countries[0].temperature);
+  assert.ok(custom.countries[0].connections > baseline.countries[0].connections);
+  assert.ok(custom.countries[0].health < baseline.countries[0].health);
+  assert.ok(stats(custom).travel > stats(baseline).travel);
+  for (let day = 0; day < 100; day++) tick(custom);
+  assert.deepEqual(restore(serialize(custom), world), custom);
+});

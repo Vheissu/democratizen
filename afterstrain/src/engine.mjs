@@ -1,4 +1,4 @@
-import { ARCHETYPES, TRAITS, EVENTS, SCENARIOS, SYNERGIES } from './catalog.mjs';
+import { ARCHETYPES, TRAITS, EVENTS, SCENARIOS, SYNERGIES, GENOMES } from './catalog.mjs';
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 export function hash(seed) {
@@ -20,14 +20,19 @@ export function createGame(world, options = {}) {
     scenario: SCENARIOS.some(item => item.id === options.scenario) ? options.scenario : 'frontier',
     difficulty: clamp(Number(options.difficulty) || 1, 0.6, 1.6),
     chaos: clamp(Number(options.chaos) || 1, 0.5, 2),
+    genome: GENOMES.some(item => item.id === options.genome) ? options.genome : 'balanced',
+    climate: clamp(Number(options.climate) || 0, -20, 20),
+    mobility: clamp(Number(options.mobility) || 1, 0.5, 2),
+    capacity: clamp(Number(options.capacity) || 1, 0.5, 1.5),
+    density: clamp(Number(options.density) || 1, 0.5, 2),
     day: 0, points: 18, awareness: 0, research: 0, traits: {}, events: [], news: [],
     history: [], status: 'playing', reached: 1, milestones: 0, countries: [],
   };
   state.countries = world.map(country => ({
     id: country.id, name: country.name, center: country.center,
-    population: Math.round(0.5e6 + random(state) ** 2 * 120e6),
-    health: 0.3 + random(state) * 0.7, connections: 0.4 + random(state) * 0.6,
-    temperature: 32 - Math.abs(country.center[1]) * 0.7 + random(state) * 12,
+    population: Math.round((0.5e6 + random(state) ** 2 * 120e6) * state.density),
+    health: clamp((0.3 + random(state) * 0.7) * state.capacity, 0.1, 1), connections: (0.4 + random(state) * 0.6) * state.mobility,
+    temperature: 32 - Math.abs(country.center[1]) * 0.7 + random(state) * 12 + state.climate,
     influence: 0, disruption: 0, closed: false, routes: [],
   }));
   for (const country of state.countries) {
@@ -52,6 +57,7 @@ export function report(state, title, kind = 'event') {
 export function stats(state) {
   const archetype = ARCHETYPES.find(item => item.id === state.archetype);
   const result = { spread: archetype.spread, stealth: archetype.stealth, drift: archetype.drift, travel: 1, resist: 0, cold: archetype.cold || 0, warm: archetype.warm || 0, impact: 0 };
+  for (const [key, value] of Object.entries(GENOMES.find(item => item.id === state.genome).modifiers)) result[key] += value;
   for (const trait of TRAITS) result[trait.stat] += (state.traits[trait.id] || 0) * trait.value;
   for (const synergy of SYNERGIES) if (synergy.needs.every(id => state.traits[id])) result[synergy.stat] += synergy.value;
   return result;
@@ -115,7 +121,7 @@ export function tick(state) {
     const adaptation = temperature < 10 ? attributes.cold + effects.cold : temperature > 25 ? attributes.warm + effects.warm : 0.3;
     const climate = clamp(0.65 + adaptation * 0.4, 0.3, 2.5);
     const defence = 1 - country.health * 0.25 * state.difficulty - state.research / 350;
-    const growth = 0.075 * attributes.spread * climate * defence;
+    const growth = 0.075 * attributes.spread * climate * defence * Math.sqrt(state.density);
     country.influence = clamp(country.influence + Math.max(0.00004, country.influence * (1 - country.influence) * growth), 0, 1);
     country.disruption = clamp(country.influence * (0.08 + attributes.impact * 0.15), 0, 1);
     for (const destination of country.routes) {
@@ -163,6 +169,9 @@ export function restore(raw, world) {
     const validNumber = (value, low, high) => Number.isFinite(value) && value >= low && value <= high;
     for (const [key, low, high] of [['day', 0, 1e8], ['rng', 1, 4294967295], ['points', 0, 1e9], ['research', 0, 100], ['awareness', 0, 100], ['difficulty', 0.6, 1.6], ['chaos', 0.5, 2], ['milestones', 0, 20]]) if (!validNumber(saved[key], low, high)) return null;
     if (typeof saved.name !== 'string' || saved.name.length > 40 || typeof saved.seed !== 'string' || saved.seed.length > 80) return null;
+    if (!world.some(country => country.id === saved.origin)) return null;
+    if (saved.genome !== undefined && !GENOMES.some(item => item.id === saved.genome)) return null;
+    for (const [key, low, high] of [['climate', -20, 20], ['mobility', 0.5, 2], ['capacity', 0.5, 1.5], ['density', 0.5, 2]]) if (saved[key] !== undefined && !validNumber(saved[key], low, high)) return null;
     const rebuilt = createGame(world, saved);
     for (let index = 0; index < world.length; index++) {
       const country = saved.countries[index];
@@ -172,6 +181,7 @@ export function restore(raw, world) {
       rebuilt.countries[index].closed = Boolean(country.closed);
     }
     for (const [id, rank] of Object.entries(saved.traits)) if (!TRAITS.some(trait => trait.id === id) || !Number.isInteger(rank) || rank < 0 || rank > 3) return null;
+    if (TRAITS.some(trait => saved.traits[trait.id] > 0 && trait.requires && !saved.traits[trait.requires])) return null;
     if (!Array.isArray(saved.events) || saved.events.length > 10 || saved.events.some(event => !EVENTS.some(template => template.id === event.id) || !world.some(country => country.id === event.country) || !validNumber(event.until, saved.day, saved.day + 30))) return null;
     const events = saved.events.map(event => ({ ...EVENTS.find(template => template.id === event.id), country: event.country, until: event.until }));
     const news = Array.isArray(saved.news) ? saved.news.slice(0, 60).filter(item => typeof item.title === 'string' && item.title.length < 300 && validNumber(item.day, 0, saved.day)).map(item => ({ title: item.title, day: item.day, kind: String(item.kind).slice(0, 20) })) : [];
