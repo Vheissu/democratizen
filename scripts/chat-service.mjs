@@ -23,5 +23,9 @@ if (command === 'install') {
   for (let attempt = 0; result.status && attempt < 3; attempt++) { await new Promise(r => setTimeout(r, 500)); result = run(['bootstrap', domain, file]); }
   if (result.status) throw new Error(result.stderr || result.stdout);
   console.log('Frame Chat host installed and started. It starts when you log in.');
+} else if (command === 'uninstall') {
+  run(['bootout', `${domain}/${label}`]);
+  if (fs.existsSync(file)) fs.renameSync(file, path.join(chatData, 'companion-launch-agent.plist'));
+  console.log('Frame Chat companion removed from login startup. Its configuration and chats are preserved.');
 } else if (command === 'stop') { const result = run(['bootout', `${domain}/${label}`]); if (result.status) throw new Error(result.stderr); console.log('Frame Chat host stopped.'); }
 else { const result = run(['print', `${domain}/${label}`]); if (result.status) { console.log('Frame Chat host is not running.'); process.exitCode = 1; } else console.log(result.stdout.split('\n').filter(line => /state =|pid =|last exit code/.test(line)).join('\n')); }

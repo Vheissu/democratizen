@@ -23,3 +23,6 @@ __pycache__/
 *.pyc
 tv-pty/bin/
 tv-pty/obj/
+
+.playwright-mcp/
+output/playwright/

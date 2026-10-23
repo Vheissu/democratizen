@@ -1,6 +1,10 @@
 # Security
 
-Frame Chat keeps its OpenAI login in a separate private Codex profile on the Mac. Account tokens are never bundled in the TV widget or returned over the companion protocol. Its host exposes a fixed set of chat operations, checks chat ownership against the current account, disables shell/app/plugin tools, and rejects requests from unpaired clients. Model Markdown is sanitised before rendering; embedded images and active HTML are omitted. See [Frame Chat](docs/frame-chat.md) for storage, sign-in and deployment details.
+The twelve Frame Apps widgets run offline, request only the public TV input-device privilege and block outgoing connections through their content policy. Scores, settings and saved pictures use local widget storage without additional encryption. There are no account tokens or pairing credentials in these apps. The browser preview server binds to loopback and serves only its generated app directory.
+
+Frame Chat defaults to a standalone TV widget. It connects over HTTPS directly to OpenAI and stores its subscription tokens and chat history in the widget's local browser storage. That storage has no additional encryption or hardware-backed keychain; root access or an app-storage compromise can expose it. Tokens are never included in the build. Account ownership includes both the OpenAI user and workspace, and signing out removes local tokens. Model Markdown is sanitised before rendering; embedded images, active HTML and executable tools are omitted.
+
+Optional companion mode keeps a separate Codex login on the Mac, with tokens excluded from the TV package and companion messages. Its paired host checks chat ownership and disables shell/app/plugin tools. See [Frame Chat](docs/frame-chat.md) for each mode's storage and deployment details.
 
 Frame Terminal can execute commands as the host user. Its pairing keys are access credentials. A paired TV should be trusted at the same level as another terminal logged in as that user.
 

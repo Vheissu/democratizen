@@ -10,6 +10,10 @@
   },
   "type": "module",
   "scripts": {
+    "suite:build": "node scripts/build-frame-suite.mjs",
+    "suite:preview": "node scripts/preview-frame-suite.mjs",
+    "suite:deploy": "sh scripts/deploy-frame-suite.sh",
+    "suite:verify": "sh scripts/verify-frame-suite.sh",
     "chat:setup": "node scripts/chat-config.mjs",
     "chat:build": "node scripts/build-frame-chat.mjs",
     "chat:start": "node server/chat-main.mjs",
@@ -32,7 +36,8 @@
     "tv:verify": "node scripts/verify-tv-root.mjs",
     "service:install": "node scripts/service.mjs install",
     "service:stop": "node scripts/service.mjs stop",
-    "service:status": "node scripts/service.mjs status"
+    "service:status": "node scripts/service.mjs status",
+    "chat:service:uninstall": "node scripts/chat-service.mjs uninstall"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "5.3.0",
@@ -48,6 +53,7 @@
     "ws": "8.22.0"
   },
   "devDependencies": {
+    "@tabler/icons": "3.49.0",
     "esbuild": "0.28.2"
   },
   "engines": {

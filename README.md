@@ -6,7 +6,11 @@ democratizen is a practical starting point for making Samsung Tizen TVs your own
 
 The first app is **Frame Terminal**: shells on your Mac and an optional root shell on the TV, with up to eight sessions and keyboard input. Switch between machines in the sidebar. Leave the TV app and reconnect while the host and TV stay online to restore your sessions.
 
-**[Frame Chat](docs/frame-chat.md)** adds subscription-backed AI conversations: streaming replies, saved chats and model selection in a small TV widget. It uses the Codex engine installed with ChatGPT on your Mac and offers a ChatGPT device-code sign-in flow.
+**[Frame Chat](docs/frame-chat.md)** adds subscription-backed AI conversations: streaming replies, saved chats and model selection in a small TV widget. It runs directly on the TV and signs in through OpenAI’s device-code flow. Your Mac can be switched off after installation.
+
+**[Frame Apps](docs/frame-apps.md)** adds twelve standalone apps: Nokia-inspired Snake, Falling Blocks, Brick Breaker, 2048, Minefield, Memory Pairs, Focus, Breathe, Soundscape, World Clocks, Pixel Studio and Life Garden. Each runs directly on the TV. Build the collection with `npm run suite:build`, preview it with `npm run suite:preview`, or install it with `npm run suite:deploy -- all`.
+
+![Frame Apps browser library](docs/images/frame-apps.png)
 
 ## Frame Terminal in use
 
@@ -29,6 +33,7 @@ Captured from the running browser preview, connected to the Mac host and a Samsu
 | Create the certificates needed to install apps | [Signing and certificates](docs/signing.md) |
 | Put a small app on the screen first | [Your first TV app](docs/first-app.md) |
 | Use a Mac terminal on the TV | [Frame Terminal setup and controls](docs/frame-terminal.md) |
+| Play games or use the twelve standalone apps | [Frame Apps setup and controls](docs/frame-apps.md) |
 | Chat using my ChatGPT subscription | [Frame Chat setup and controls](docs/frame-chat.md) |
 | Switch to the TV's own root terminal | [TV root shell](docs/tv-shell.md) |
 | Build my own app | [App development guide](docs/building-apps.md) |
